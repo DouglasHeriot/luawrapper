@@ -1623,7 +1623,7 @@ private:
     {
         if (index >= 0) {
             Binder<TCallback, const TFirstType&> binder{ callback, {} };
-            return readIntoFunction(state, retValueTag, binder, index + 1, othersTags...);
+            return readIntoFunction(state, retValueTag, binder, index + 1, tag<TTypes...>());
         }
 
         const auto& firstElem = Reader<typename std::decay<TFirstType>::type>::read(state, index);
