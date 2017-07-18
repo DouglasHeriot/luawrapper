@@ -1628,7 +1628,7 @@ private:
 
         const auto& firstElem = Reader<typename std::decay<TFirstType>::type>::read(state, index);
         if (!firstElem)
-            throw WrongTypeException(lua_typename(state, index), typeid(TFirstType));
+            throw WrongTypeException(lua_typename(state, lua_type(state, index)), typeid(TFirstType));
 
         Binder<TCallback, const TFirstType&> binder{ callback, *firstElem };
         return readIntoFunction(state, retValueTag, binder, index + 1, tag<TTypes...>());
@@ -1641,7 +1641,7 @@ private:
 
         const auto& firstElem = Reader<typename std::decay<TFirstType>::type>::read(state, index);
         if (!firstElem)
-            throw WrongTypeException(lua_typename(state, index), typeid(TFirstType));
+            throw WrongTypeException(lua_typename(state, lua_type(state, index)), typeid(TFirstType));
 
         Binder<TCallback, const TFirstType&> binder{ callback, *firstElem };
         return readIntoFunction(state, retValueTag, binder, index + 1, tag<TTypes...>());
