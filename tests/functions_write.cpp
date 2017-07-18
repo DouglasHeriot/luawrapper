@@ -217,3 +217,57 @@ TEST(FunctionsWrite, ExecuteLuaFromWithinCallback) {
 
     context.executeCode("exec(\"x\")");
 }
+
+TEST(FunctionsWrite, CallbackNotLastArgument) {
+    LuaContext context;
+
+    struct Foo {
+        static int a(void)
+        {
+            return 1;
+        }
+
+        static int b(void)
+        {
+            return 2;
+        }
+    };
+
+    context.writeFunction("foo", [](std::function<int(void)> a, std::function<int(void)> b) {
+        return a();
+    });
+
+    EXPECT_EQ(1, context.executeCode<int>("function a() return 1 end function b() return 2 end return foo(a,b)"));
+}
+
+TEST(FunctionsWrite, ArgumentTypeMismatch) {
+    LuaContext context;
+
+    context.writeFunction("foo", [](const std::string&, int) { });
+    try {
+        context.executeCode("foo({}, 1)");
+    } catch (LuaContext::ExecutionErrorException e) {
+        EXPECT_EQ(
+            std::string("Unable to convert parameter from table to ") + typeid(std::string).name(),
+            e.what());
+        return;
+    }
+
+    GTEST_NONFATAL_FAILURE_("Didn't throw LuaContext::ExecutionErrorException as expected.");
+}
+
+TEST(FunctionsWrite, OptionalArgumentTypeMismatch) {
+    LuaContext context;
+
+    context.writeFunction("foo", [](const boost::optional<std::string>&, int) { });
+    try {
+        context.executeCode("foo({}, 1)");
+    } catch (LuaContext::ExecutionErrorException e) {
+        EXPECT_EQ(
+            std::string("Unable to convert parameter from table to ") + typeid(boost::optional<std::string>).name(),
+            e.what());
+        return;
+    }
+
+    GTEST_NONFATAL_FAILURE_("Didn't throw LuaContext::ExecutionErrorException as expected.");
+}
